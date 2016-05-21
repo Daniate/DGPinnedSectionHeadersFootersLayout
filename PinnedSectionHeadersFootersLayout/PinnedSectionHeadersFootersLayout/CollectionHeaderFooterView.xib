@@ -11,8 +11,8 @@
             <rect key="frame" x="0.0" y="0.0" width="320" height="50"/>
             <autoresizingMask key="autoresizingMask"/>
             <subviews>
-                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wgL-YC-z5J">
-                    <rect key="frame" x="8" y="14" width="42" height="21"/>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wgL-YC-z5J">
+                    <rect key="frame" x="139" y="14" width="42" height="21"/>
                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                     <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                     <nil key="highlightedColor"/>
@@ -20,8 +20,14 @@
             </subviews>
             <constraints>
                 <constraint firstItem="wgL-YC-z5J" firstAttribute="centerY" secondItem="U6b-Vx-4bR" secondAttribute="centerY" id="6qt-zS-f3s"/>
-                <constraint firstItem="wgL-YC-z5J" firstAttribute="leading" secondItem="U6b-Vx-4bR" secondAttribute="leading" constant="8" id="h8k-Ei-RYb"/>
+                <constraint firstItem="wgL-YC-z5J" firstAttribute="centerX" secondItem="U6b-Vx-4bR" secondAttribute="centerX" id="Ycb-bT-cJg"/>
+                <constraint firstItem="wgL-YC-z5J" firstAttribute="leading" secondItem="U6b-Vx-4bR" secondAttribute="leading" id="h8k-Ei-RYb"/>
             </constraints>
+            <variation key="default">
+                <mask key="constraints">
+                    <exclude reference="h8k-Ei-RYb"/>
+                </mask>
+            </variation>
             <connections>
                 <outlet property="textLabel" destination="wgL-YC-z5J" id="mNY-8k-3aS"/>
             </connections>
