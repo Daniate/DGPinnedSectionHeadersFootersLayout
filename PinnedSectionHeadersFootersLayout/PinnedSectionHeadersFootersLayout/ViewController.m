@@ -18,10 +18,10 @@
 NSUInteger columns = 4;
 CGFloat minimumLineSpacing = 10;
 CGFloat minimumInteritemSpacing = 10;
-CGFloat sectionInsetTop = 10;
-CGFloat sectionInsetLeft = 10;
-CGFloat sectionInsetBottom = 10;
-CGFloat sectionInsetRight = 10;
+CGFloat sectionInsetTop = 30;
+CGFloat sectionInsetLeft = 30;
+CGFloat sectionInsetBottom = 30;
+CGFloat sectionInsetRight = 30;
 
 @implementation ViewController
 
@@ -70,7 +70,7 @@ CGFloat sectionInsetRight = 10;
     return 10 + arc4random() % 100;
 }
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    return arc4random() % 20;
+    return section % 2 == 0 ? 1 + arc4random() % 10 : 0;
 }
 
 // The cell that is returned must be retrieved from a call to -dequeueReusableCellWithReuseIdentifier:forIndexPath:
