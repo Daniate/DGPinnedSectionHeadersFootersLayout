@@ -16,12 +16,31 @@
 @end
 
 NSUInteger columns = 4;
+
 CGFloat minimumLineSpacing = 10;
 CGFloat minimumInteritemSpacing = 10;
+
+#if 1
 CGFloat sectionInsetTop = 30;
 CGFloat sectionInsetLeft = 30;
 CGFloat sectionInsetBottom = 30;
 CGFloat sectionInsetRight = 30;
+
+CGFloat contentInsetTop = 30;
+CGFloat contentInsetLeft = 20;
+CGFloat contentInsetBottom = 30;
+CGFloat contentInsetRight = 20;
+#else
+CGFloat sectionInsetTop = 0;
+CGFloat sectionInsetLeft = 0;
+CGFloat sectionInsetBottom = 0;
+CGFloat sectionInsetRight = 0;
+
+CGFloat contentInsetTop = 0;
+CGFloat contentInsetLeft = 0;
+CGFloat contentInsetBottom = 0;
+CGFloat contentInsetRight = 0;
+#endif
 
 @implementation ViewController
 
@@ -29,7 +48,7 @@ CGFloat sectionInsetRight = 30;
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
-    self.collectionView.scrollIndicatorInsets = self.collectionView.contentInset = UIEdgeInsetsMake(30, 20, 30, 20);
+    self.collectionView.scrollIndicatorInsets = self.collectionView.contentInset = UIEdgeInsetsMake(contentInsetTop, contentInsetLeft, contentInsetBottom, contentInsetRight);
     
     PinnedSectionHeadersFootersLayout *lyt = [[PinnedSectionHeadersFootersLayout alloc] init];
     lyt.minimumLineSpacing = minimumLineSpacing;
@@ -112,9 +131,9 @@ CGFloat sectionInsetRight = 30;
     PinnedSectionHeadersFootersLayout *lyt = (PinnedSectionHeadersFootersLayout *)collectionViewLayout;
     CGSize size = CGSizeZero;
     if (lyt.scrollDirection == UICollectionViewScrollDirectionVertical) {
-        size = CGSizeMake(CGRectGetWidth(collectionView.bounds), 20);
+        size = CGSizeMake(CGRectGetWidth(collectionView.bounds), 30);
     } else {
-        size = CGSizeMake(40, CGRectGetHeight(collectionView.bounds));
+        size = CGSizeMake(50, CGRectGetHeight(collectionView.bounds));
     }
     return size;
 }

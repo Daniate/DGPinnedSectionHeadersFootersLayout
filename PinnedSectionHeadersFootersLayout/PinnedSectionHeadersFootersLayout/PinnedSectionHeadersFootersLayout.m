@@ -8,6 +8,9 @@
 
 #import "PinnedSectionHeadersFootersLayout.h"
 
+// In iOS 9, Apple's default implementations use 10 for pinned section headers footers layout attributes zIndex, I copy it.
+#define PinnedSectionHeadersFootersZIndex (10)
+
 @implementation PinnedSectionHeadersFootersLayout
 
 - (instancetype)init {
@@ -54,6 +57,7 @@
     _pinnedSectionFooters = pinnedSectionFooters;
 }
 
+#pragma mark - Override
 #ifdef __IPHONE_9_0
 - (void)setSectionHeadersPinToVisibleBounds:(BOOL)sectionHeadersPinToVisibleBounds {
     [super setSectionHeadersPinToVisibleBounds:sectionHeadersPinToVisibleBounds];
@@ -67,41 +71,30 @@
 #endif
 
 #if __ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__ < 90000
-- (nullable NSArray<__kindof UICollectionViewLayoutAttributes *> *)layoutAttributesForElementsInRect:(CGRect)rect {
-    // fix iOS 6 bugs
+- (void)prepareLayout {
+    [super prepareLayout];
+    
+    // fix iOS 6 bug: can scroll vertical and horizontal simultaneously
     if ([[UIDevice currentDevice].systemVersion compare:@"7.0" options:NSNumericSearch] == NSOrderedAscending) {
         self.collectionView.directionalLockEnabled = YES;
-        if (self.scrollDirection == UICollectionViewScrollDirectionVertical) {
-            self.collectionView.showsHorizontalScrollIndicator = NO;
-            self.collectionView.showsVerticalScrollIndicator = YES;
-        } else if (self.scrollDirection == UICollectionViewScrollDirectionHorizontal) {
-            self.collectionView.showsHorizontalScrollIndicator = YES;
-            self.collectionView.showsVerticalScrollIndicator = NO;
-        }
+        BOOL show = (self.scrollDirection == UICollectionViewScrollDirectionHorizontal);
+        self.collectionView.showsHorizontalScrollIndicator = show;
+        self.collectionView.showsVerticalScrollIndicator = !show;
     }
+}
+
+- (nullable NSArray<__kindof UICollectionViewLayoutAttributes *> *)layoutAttributesForElementsInRect:(CGRect)rect {
     // pin headers & footers
     NSArray<__kindof UICollectionViewLayoutAttributes *> *superAttrsList = [super layoutAttributesForElementsInRect:rect];
-    // If system version is less than 9.0, using custom implementations
+    // If system version is less than 9.0, using custom implementations; otherwise, using Apple's implementations
     if ([[UIDevice currentDevice].systemVersion compare:@"9.0" options:NSNumericSearch] == NSOrderedAscending) {
         if (self.pinnedSectionHeaders || self.pinnedSectionFooters) {
             NSMutableArray<__kindof UICollectionViewLayoutAttributes *> *attrsList = [superAttrsList mutableCopy];
             if (self.pinnedSectionHeaders) {
-                NSIndexSet *indexSet = [self disappearedSections:attrsList supplementaryViewOfKind:UICollectionElementKindSectionHeader];
-                [self complementDisappearedAttributesList:attrsList indexSet:indexSet supplementaryViewOfKind:UICollectionElementKindSectionHeader];
-                if (self.scrollDirection == UICollectionViewScrollDirectionVertical) {
-                    [self pinVerticalSectionHeaders:attrsList];
-                } else if (self.scrollDirection == UICollectionViewScrollDirectionHorizontal) {
-                    [self pinHorizontalSectionHeaders:attrsList];
-                }
+                [self pinSectionHeaders:attrsList];
             }
             if (self.pinnedSectionFooters) {
-                NSIndexSet *indexSet = [self disappearedSections:attrsList supplementaryViewOfKind:UICollectionElementKindSectionFooter];
-                [self complementDisappearedAttributesList:attrsList indexSet:indexSet supplementaryViewOfKind:UICollectionElementKindSectionFooter];
-                if (self.scrollDirection == UICollectionViewScrollDirectionVertical) {
-                    [self pinVerticalSectionFooters:attrsList];
-                } else if (self.scrollDirection == UICollectionViewScrollDirectionHorizontal) {
-                    [self pinHorizontalSectionFooters:attrsList];
-                }
+                [self pinSectionFooters:attrsList];
             }
             return attrsList;
         }
@@ -110,26 +103,31 @@
 }
 
 - (BOOL)shouldInvalidateLayoutForBoundsChange:(CGRect)newBounds {
-    // If system version is less than 9.0, using custom implementations
+    // If system version is less than 9.0, use custom implementations; otherwise, use Apple's implementations
     if ([[UIDevice currentDevice].systemVersion compare:@"9.0" options:NSNumericSearch] == NSOrderedAscending) {
         return (self.pinnedSectionHeaders || self.pinnedSectionFooters);
     }
     return [super shouldInvalidateLayoutForBoundsChange:newBounds];
 }
-#endif
-
-#if __ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__ < 90000
-- (NSIndexSet *)disappearedSections:(NSArray<__kindof UICollectionViewLayoutAttributes *> *)attributesList supplementaryViewOfKind:(NSString *)elementKind {
-    // 查找可能已经消失的header/footer对应的section
+#pragma mark - Private
+/**
+ *  查找已消失的setion header/footer所对应的section
+ *
+ *  @param attributesList 现有的layout attributes list
+ *  @param elementKind    UICollectionElementKindSectionHeader/UICollectionElementKindSectionFooter
+ *
+ *  @return 存放已消失的section
+ */
+- (NSIndexSet *)findDisappearedSections:(NSArray<__kindof UICollectionViewLayoutAttributes *> *)attributesList supplementaryViewOfKind:(NSString *)elementKind {
     NSMutableIndexSet *disappearedSections = [NSMutableIndexSet indexSet];
-    // 根据当前显示的cell，获取section
+    // 根据当前显示的cell，将section添加到index set中
     for (UICollectionViewLayoutAttributes *attributes in attributesList) {
         NSInteger section = attributes.indexPath.section;
         if (attributes.representedElementCategory == UICollectionElementCategoryCell) {
             [disappearedSections addIndex:section];
         }
     }
-    // 将当前显示的section header/footer，从索引中移除
+    // 移除未消失的section header/footer所对应的section
     for (UICollectionViewLayoutAttributes *attributes in attributesList) {
         NSInteger section = attributes.indexPath.section;
         if ([attributes.representedElementKind isEqualToString:elementKind]) {
@@ -139,8 +137,14 @@
     return disappearedSections;
 }
 
-- (void)complementDisappearedAttributesList:(inout NSMutableArray<__kindof UICollectionViewLayoutAttributes *> *)attributesList indexSet:(NSIndexSet *)indexSet supplementaryViewOfKind:(NSString *)elementKind {
-    // 为已经消失的header/footer，补充layout attributes
+/**
+ *  将已消失的section header/footer所对应的layout attributes添加到现有的layout attributes list中
+ *
+ *  @param attributesList 现有的layout attributes list
+ *  @param indexSet       已消失的setion header/footer所对应的section
+ *  @param elementKind    UICollectionElementKindSectionHeader/UICollectionElementKindSectionFooter
+ */
+- (void)addDisappearedAttributesToList:(inout NSMutableArray<__kindof UICollectionViewLayoutAttributes *> *)attributesList indexSet:(NSIndexSet *)indexSet supplementaryViewOfKind:(NSString *)elementKind {
     __typeof(&*self) __weak zelf = self;
     [indexSet enumerateIndexesWithOptions:NSEnumerationConcurrent usingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
         NSIndexPath *idxPath = [NSIndexPath indexPathForItem:0 inSection:idx];
@@ -158,17 +162,46 @@
         }
     }];
 }
-
+/**
+ *  修正section headers
+ *
+ *  @param attributesList layout attributes list
+ */
+- (void)pinSectionHeaders:(inout NSMutableArray<__kindof UICollectionViewLayoutAttributes *> *)attributesList {
+    NSIndexSet *indexSet = [self findDisappearedSections:attributesList supplementaryViewOfKind:UICollectionElementKindSectionHeader];
+    [self addDisappearedAttributesToList:attributesList indexSet:indexSet supplementaryViewOfKind:UICollectionElementKindSectionHeader];
+    if (self.scrollDirection == UICollectionViewScrollDirectionVertical) {
+        [self pinVerticalSectionHeaders:attributesList];
+    } else if (self.scrollDirection == UICollectionViewScrollDirectionHorizontal) {
+        [self pinHorizontalSectionHeaders:attributesList];
+    }
+}
+/**
+ *  修正section footers
+ *
+ *  @param attributesList layout attributes list
+ */
+- (void)pinSectionFooters:(inout NSMutableArray<__kindof UICollectionViewLayoutAttributes *> *)attributesList {
+    NSIndexSet *indexSet = [self findDisappearedSections:attributesList supplementaryViewOfKind:UICollectionElementKindSectionFooter];
+    [self addDisappearedAttributesToList:attributesList indexSet:indexSet supplementaryViewOfKind:UICollectionElementKindSectionFooter];
+    if (self.scrollDirection == UICollectionViewScrollDirectionVertical) {
+        [self pinVerticalSectionFooters:attributesList];
+    } else if (self.scrollDirection == UICollectionViewScrollDirectionHorizontal) {
+        [self pinHorizontalSectionFooters:attributesList];
+    }
+}
+/**
+ *  修正竖直滚动方向上的section headers
+ *
+ *  @param attributesList layout attributes list
+ */
 - (void)pinVerticalSectionHeaders:(inout NSMutableArray<__kindof UICollectionViewLayoutAttributes *> *)attributesList {
-    // 修正vertical header的layout attributes
     for (UICollectionViewLayoutAttributes *attributes in attributesList) {
         if ([UICollectionElementKindSectionHeader isEqualToString:attributes.representedElementKind]) {
             CGRect headerFrame = attributes.frame;
             CGFloat headerMaxY = CGRectGetMaxY(headerFrame);
-            
             NSInteger section = attributes.indexPath.section;
             NSUInteger itemCount = [self.collectionView numberOfItemsInSection:section];
-            
             UICollectionViewLayoutAttributes *attrs1 = nil;
             UICollectionViewLayoutAttributes *attrs2 = nil;
             if (itemCount) {
@@ -185,20 +218,22 @@
             CGFloat maxHeaderOriginY = CGRectGetMaxY(attrs2.frame) + self.sectionInset.bottom - CGRectGetHeight(headerFrame);
             headerFrame.origin.y = MIN(MAX(offsetY, minHeaderOriginY), maxHeaderOriginY);
             attributes.frame = headerFrame;
-            attributes.zIndex = 10;
+            attributes.zIndex = PinnedSectionHeadersFootersZIndex;
         }
     }
 }
+/**
+ *  修正竖直滚动方向上的section footers
+ *
+ *  @param attributesList layout attributes list
+ */
 - (void)pinVerticalSectionFooters:(inout NSMutableArray<__kindof UICollectionViewLayoutAttributes *> *)attributesList {
-    // 修正vertical footer的layout attributes
     for (UICollectionViewLayoutAttributes *attributes in attributesList) {
         if ([UICollectionElementKindSectionFooter isEqualToString:attributes.representedElementKind]) {
             CGRect footerFrame = attributes.frame;
             CGFloat footerMinY = CGRectGetMinY(footerFrame);
-            
             NSInteger section = attributes.indexPath.section;
             NSUInteger itemCount = [self.collectionView numberOfItemsInSection:section];
-            
             UICollectionViewLayoutAttributes *attrs1 = nil;
             UICollectionViewLayoutAttributes *attrs2 = nil;
             if (itemCount) {
@@ -215,20 +250,22 @@
             CGFloat maxFooterOriginY = CGRectGetMaxY(attrs2.frame) + self.sectionInset.bottom;
             footerFrame.origin.y = MIN(MAX(offsetY, minFooterOriginY), maxFooterOriginY);
             attributes.frame = footerFrame;
-            attributes.zIndex = 10;
+            attributes.zIndex = PinnedSectionHeadersFootersZIndex;
         }
     }
 }
+/**
+ *  修正水平滚动方向上的section headers
+ *
+ *  @param attributesList layout attributes list
+ */
 - (void)pinHorizontalSectionHeaders:(inout NSMutableArray<__kindof UICollectionViewLayoutAttributes *> *)attributesList {
-    // 修正horizontal header的layout attributes
     for (UICollectionViewLayoutAttributes *attributes in attributesList) {
         if ([UICollectionElementKindSectionHeader isEqualToString:attributes.representedElementKind]) {
             CGRect headerFrame = attributes.frame;
             CGFloat headerMaxX = CGRectGetMaxX(headerFrame);
-            
             NSInteger section = attributes.indexPath.section;
             NSUInteger itemCount = [self.collectionView numberOfItemsInSection:section];
-            
             UICollectionViewLayoutAttributes *attrs1 = nil;
             UICollectionViewLayoutAttributes *attrs2 = nil;
             if (itemCount) {
@@ -245,20 +282,22 @@
             CGFloat maxHeaderOriginX = CGRectGetMaxX(attrs2.frame) + self.sectionInset.right - CGRectGetWidth(headerFrame);
             headerFrame.origin.x = MIN(MAX(offsetX, minHeaderOriginX), maxHeaderOriginX);
             attributes.frame = headerFrame;
-            attributes.zIndex = 10;
+            attributes.zIndex = PinnedSectionHeadersFootersZIndex;
         }
     }
 }
+/**
+ *  修正水平滚动方向上的section footers
+ *
+ *  @param attributesList layout attributes list
+ */
 - (void)pinHorizontalSectionFooters:(inout NSMutableArray<__kindof UICollectionViewLayoutAttributes *> *)attributesList {
-    // 修正horizontal footer的layout attributes
     for (UICollectionViewLayoutAttributes *attributes in attributesList) {
         if ([UICollectionElementKindSectionFooter isEqualToString:attributes.representedElementKind]) {
             CGRect footerFrame = attributes.frame;
             CGFloat footerMinX = CGRectGetMinX(footerFrame);
-            
             NSInteger section = attributes.indexPath.section;
             NSUInteger itemCount = [self.collectionView numberOfItemsInSection:section];
-            
             UICollectionViewLayoutAttributes *attrs1 = nil;
             UICollectionViewLayoutAttributes *attrs2 = nil;
             if (itemCount) {
@@ -275,7 +314,7 @@
             CGFloat maxFooterOriginX = CGRectGetMaxX(attrs2.frame) + self.sectionInset.right;
             footerFrame.origin.x = MIN(MAX(offsetX, minFooterOriginX), maxFooterOriginX);
             attributes.frame = footerFrame;
-            attributes.zIndex = 10;
+            attributes.zIndex = PinnedSectionHeadersFootersZIndex;
         }
     }
 }
