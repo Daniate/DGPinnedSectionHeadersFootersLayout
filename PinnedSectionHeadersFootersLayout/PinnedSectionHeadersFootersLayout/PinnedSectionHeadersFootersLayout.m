@@ -122,16 +122,14 @@
     NSMutableIndexSet *disappearedSections = [NSMutableIndexSet indexSet];
     // 根据当前显示的cell，将section添加到index set中
     for (UICollectionViewLayoutAttributes *attributes in attributesList) {
-        NSInteger section = attributes.indexPath.section;
         if (attributes.representedElementCategory == UICollectionElementCategoryCell) {
-            [disappearedSections addIndex:section];
+            [disappearedSections addIndex:attributes.indexPath.section];
         }
     }
     // 移除未消失的section header/footer所对应的section
     for (UICollectionViewLayoutAttributes *attributes in attributesList) {
-        NSInteger section = attributes.indexPath.section;
         if ([attributes.representedElementKind isEqualToString:elementKind]) {
-            [disappearedSections removeIndex:section];
+            [disappearedSections removeIndex:attributes.indexPath.section];
         }
     }
     return disappearedSections;
