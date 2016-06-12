@@ -1,0 +1,11 @@
+#use_frameworks!
+
+target 'DGPinnedSectionHeadersFootersLayout_Example' do
+  pod 'DGPinnedSectionHeadersFootersLayout', :path => '../'
+
+  target 'DGPinnedSectionHeadersFootersLayout_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end

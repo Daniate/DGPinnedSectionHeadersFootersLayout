@@ -1,21 +1,31 @@
-# PinnedSectionHeadersFootersLayout
-PinnedSectionHeadersFootersLayout For UICollectionView
+# DGPinnedSectionHeadersFootersLayout
 
-You can use this layout to achieve pinned headers and pinned footers before iOS 9.0.
+[![CI Status](http://img.shields.io/travis/Daniate/DGPinnedSectionHeadersFootersLayout.svg?style=flat)](https://travis-ci.org/Daniate/DGPinnedSectionHeadersFootersLayout)
+[![Version](https://img.shields.io/cocoapods/v/DGPinnedSectionHeadersFootersLayout.svg?style=flat)](http://cocoapods.org/pods/DGPinnedSectionHeadersFootersLayout)
+[![License](https://img.shields.io/cocoapods/l/DGPinnedSectionHeadersFootersLayout.svg?style=flat)](http://cocoapods.org/pods/DGPinnedSectionHeadersFootersLayout)
+[![Platform](https://img.shields.io/cocoapods/p/DGPinnedSectionHeadersFootersLayout.svg?style=flat)](http://cocoapods.org/pods/DGPinnedSectionHeadersFootersLayout)
 
-In iOS 9.0+, you can also use these properties.
+## Example
 
+To run the example project, clone the repo, and run `pod install` from the Example directory first.
+
+## Requirements
+
+iOS 6 and later.
+
+## Installation
+
+DGPinnedSectionHeadersFootersLayout is available through [CocoaPods](http://cocoapods.org). To install
+it, simply add the following line to your Podfile:
+
+```ruby
+pod "DGPinnedSectionHeadersFootersLayout"
 ```
-@property (nonatomic, assign) BOOL pinnedSectionHeaders;// default is YES
-@property (nonatomic, assign) BOOL pinnedSectionFooters;// default is YES
-```
-`pinnedSectionHeaders` is a replacement of `sectionHeadersPinToVisibleBounds`.
-`pinnedSectionFooters` is a replacement of `sectionFootersPinToVisibleBounds`.
 
-```
-// Set these properties to YES to get headers that pin to the top of the screen and footers that pin to the bottom while scrolling (similar to UITableView).
-@property (nonatomic) BOOL sectionHeadersPinToVisibleBounds NS_AVAILABLE_IOS(9_0);
-@property (nonatomic) BOOL sectionFootersPinToVisibleBounds NS_AVAILABLE_IOS(9_0);
-```
+## Author
 
-![image](Effects.gif)
+Daniate, daniate@126.com
+
+## License
+
+DGPinnedSectionHeadersFootersLayout is available under the MIT license. See the LICENSE file for more info.

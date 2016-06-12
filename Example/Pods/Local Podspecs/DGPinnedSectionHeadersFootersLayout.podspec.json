@@ -1,0 +1,22 @@
+{
+  "name": "DGPinnedSectionHeadersFootersLayout",
+  "version": "0.1.0",
+  "summary": "A short description of DGPinnedSectionHeadersFootersLayout.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/<GITHUB_USERNAME>/DGPinnedSectionHeadersFootersLayout",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "Daniate": "daniate@126.com"
+  },
+  "source": {
+    "git": "https://github.com/<GITHUB_USERNAME>/DGPinnedSectionHeadersFootersLayout.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "6.0"
+  },
+  "source_files": "DGPinnedSectionHeadersFootersLayout/Classes/**/*"
+}

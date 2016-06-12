@@ -1,0 +1,16 @@
+PODS:
+  - DGPinnedSectionHeadersFootersLayout (0.1.0)
+
+DEPENDENCIES:
+  - DGPinnedSectionHeadersFootersLayout (from `../`)
+
+EXTERNAL SOURCES:
+  DGPinnedSectionHeadersFootersLayout:
+    :path: ../
+
+SPEC CHECKSUMS:
+  DGPinnedSectionHeadersFootersLayout: cdd1c35df16872b45d9bc3bc2e86b90e10079cd4
+
+PODFILE CHECKSUM: 1aee9ba760db00aa1fd681d585148c89ce54be39
+
+COCOAPODS: 1.0.1
