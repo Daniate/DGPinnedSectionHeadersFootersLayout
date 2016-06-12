@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
 
   s.description      = 'Earlier than iOS 9, use this lib get collection view headers that pin to the top of the screen and collection view footers that pin to the bottom while scrolling (similar to UITableView).'
 
-  s.homepage         = 'https://github.com/Daniate/PinnedSectionHeadersFootersLayout'
+  s.homepage         = 'https://github.com/Daniate/DGPinnedSectionHeadersFootersLayout'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Daniate' => 'daniate@126.com' }
