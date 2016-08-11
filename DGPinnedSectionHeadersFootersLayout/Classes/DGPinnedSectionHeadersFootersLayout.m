@@ -36,25 +36,19 @@
 #ifdef __IPHONE_9_0
     if ([[UIDevice currentDevice].systemVersion compare:@"9.0" options:NSNumericSearch] != NSOrderedAscending) {
         [super setSectionHeadersPinToVisibleBounds:pinnedSectionHeaders];
-    } else {
-#endif
-        [self invalidateLayout];
-#ifdef __IPHONE_9_0
     }
 #endif
     _pinnedSectionHeaders = pinnedSectionHeaders;
+	[self invalidateLayout];
 }
 - (void)setPinnedSectionFooters:(BOOL)pinnedSectionFooters {
 #ifdef __IPHONE_9_0
     if ([[UIDevice currentDevice].systemVersion compare:@"9.0" options:NSNumericSearch] != NSOrderedAscending) {
         [super setSectionFootersPinToVisibleBounds:pinnedSectionFooters];
-    } else {
-#endif
-        [self invalidateLayout];
-#ifdef __IPHONE_9_0
     }
 #endif
     _pinnedSectionFooters = pinnedSectionFooters;
+	[self invalidateLayout];
 }
 
 #pragma mark - Override
